@@ -1,0 +1,6 @@
+opencv-python==4.6.0.66
+opencv-python-headless==4.6.0.66
+numexpr==2.8.3
+numpy==1.20.2
+Pillow==9.2.0
+pytesseract==0.3.9
