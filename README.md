@@ -10,18 +10,20 @@ on the output folder with the bubble sections, and a translation file associated
 ## Pre-Requisites
 
 - Python 3.9
-- [Tesseract-OCR v5+](https://tesseract-ocr.github.io/)
+- [Tesseract-OCR v5+](https://tesseract-ocr.github.io/) 
+    > Required for English manga and is needed to set env variable TESSERACT_HOME or change the value from config.py PATH_TO_TESSERACT
 - YOLOv4 configuration and weights
-    - [Download yolov4-obj_final.weights](https://drive.google.com/drive/folders/1-Ali16MS27AQoR0lEec5Z-x8lAAle0K0) and copy on folder resources/YOLOv4
+    > [Download yolov4-obj_final.weights](https://drive.google.com/drive/folders/1-Ali16MS27AQoR0lEec5Z-x8lAAle0K0) and copy on folder resources/YOLOv4
+
 
 
 ## How works?
 
 Will search all the images from the input folder and sub-folders and will start to analyze 
 with YOLOv4 weights to crop the images using CV2 after that process each bubble will be 
-processed by Tesseract to generate an output file with the extracted text, 
-by default is set xliff with the input language **EN-US** and the output **ES**,
-for use with other languages for sure will need more changes
+processed by Tesseract to generate an output file with the extracted text. 
+
+Support manga on english and japanese. 
 
 
 ## How to use?
@@ -29,6 +31,22 @@ for use with other languages for sure will need more changes
 Add the images (or folder with images) from the manga that you want 
 on the **_input** folder then you can run from your IDE or execute ```python main.py```
 
+### Optional Parameters
+```
+usage: main.py [-h] [-o OUTPUT_FORMAT] [-l LANG] [-pi PRESERVE_ID] [-f FORCE] [-i INPUT]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT_FORMAT, --output-format OUTPUT_FORMAT
+                        Output format. Supported: xliff, text, json | Default xliff
+  -l LANG, --lang LANG  Language from image. Supported: en, jpn | Default en
+  -pi PRESERVE_ID, --preserve_id PRESERVE_ID
+                        Preserve id: is the filename of the bubble image | Default True
+  -f FORCE, --force FORCE
+                        Force to process each step of the image clean and text extraction | Default False
+  -i INPUT, --input INPUT
+                        filename from image locate on _input, this work to allow to process only one image instead of all inside the folder
+```
 
 ## Example of use
 
