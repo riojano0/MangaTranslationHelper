@@ -18,6 +18,7 @@ class TextExtractionTest(unittest.TestCase):
         self.assertEqual(image_data["id"], util.get_filename_and_ext(image)["filename"] + "__clean")
         self.assertEqual(image_data["text"], text)
 
+    @unittest.skipIf(not util.tesseract_available(), "Tesseract not available")
     def test_english(self):
         self.validate_text("en_001.png", "en",
                            "AT 7 YEARS OLD, DURING MY BAPTISM CEREMONY, I FOUND THE GODS’ PARADISE. ..")

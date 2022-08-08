@@ -1,6 +1,6 @@
 import os
 
-from config import ALLOWED_EXTENSIONS
+from config import ALLOWED_EXTENSIONS, PATH_TO_TESSERACT
 
 
 def allowed_file(filename):
@@ -15,6 +15,10 @@ def get_filename_and_ext(file_path):
         "filename": filename,
         "ext": file_extension
     }
+
+
+def tesseract_available():
+    return os.path.exists(PATH_TO_TESSERACT)
 
 
 class Singleton(type):
