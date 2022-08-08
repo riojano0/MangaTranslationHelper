@@ -93,7 +93,7 @@ def _folder_image_to_text_file(image_path_folder, output_format="text", preserve
                 files.append(os.path.join(path, name))
 
     image_to_text_data = []
-    image_text_data_obj = {"data": image_to_text_data}
+    image_text_data_obj = {"texts": image_to_text_data}
     for image_path in files:
         clean_image_path = _remove_noise(image_path, force_clean=force)
         image_text_data = _image_to_text(clean_image_path, lang=lang)
@@ -104,57 +104,67 @@ def _folder_image_to_text_file(image_path_folder, output_format="text", preserve
             for image_data in image_to_text_data:
                 if preserve_id:
                     id_prefix = image_data["id"] + "__ "
-                    data_file.write(id_prefix + image_data["text"] + "\n")
+                    data_file.write(id_prefix + image_data["texts"] + "\n")
                 else:
-                    data_file.write(image_data["text"] + "\n")
+                    data_file.write(image_data["texts"] + "\n")
     elif output_format == "json":
         with open(output_file_name, "w") as data_file:
             if preserve_id:
                 json.dump(image_text_data_obj, data_file)
             else:
-                obj_without_id = {"data": [x["text"] for x in image_text_data_obj["data"]]}
+                obj_without_id = {"texts": [x["text"] for x in image_text_data_obj["texts"]]}
                 json.dump(obj_without_id, data_file)
     elif output_format == "xliff":
         with open(output_file_name, "w", encoding='UTF-8') as data_file:
-            xliff_str = _create_xliff_str(image_text_data_obj)
+            xliff_str = _create_xliff_str(image_text_data_obj, lang=lang)
             data_file.write(xliff_str)
 
     print("Created " + output_file_name)
 
 
-def _create_xliff_str(image_text_data_obj, preverse_id=True):
+def _create_xliff_str(image_text_data_obj, lang="en", preverse_id=True):
     ET.register_namespace("xmlns", "urn:oasis:names:tc:xliff:document:1.2")
     root = ET.Element("xliff", {
         "xmlns": "urn:oasis:names:tc:xliff:document:1.2",
         "version": "1.2"
     })
 
-    file = ET.Element("file")
-    file.set("original", "global")
-    file.set("source-language", "en-US")
-    file.set("target-language", "es")
-    body = ET.Element("body")
-    file.append(body)
-    root.append(file)
-
-    for image_data in image_text_data_obj["data"]:
-        attrs = {}
-        if preverse_id:
-            attrs = {"id": image_data["id"]}
-
-        trans_unit = ET.Element("trans-unit", attrs)
-
-        source = ET.Element("source", {"xml:xlang": "en-US"})
-        source.text = image_data["text"]
-        target = ET.Element("target", {"xml:xlang": "es"})
-        target.text = " "
-        trans_unit.append(source)
-        trans_unit.append(target)
-        body.append(trans_unit)
+    if lang == "en":
+        _create_xliff_file_section(root, "en-US", "es", image_text_data_obj, preverse_id)
+    else:
+        # Default for spanish
+        _create_xliff_file_section(root, lang, "es", image_text_data_obj, preverse_id)
+        # Default for English
+        _create_xliff_file_section(root, lang, "en-US", image_text_data_obj, preverse_id)
 
     return minidom.parseString(
         ET.tostring(root, encoding='UTF-8', method='xml', short_empty_elements=False)) \
         .toprettyxml(indent="   ", )
+
+
+def _create_xliff_file_section(root, source_lang, target_lang, image_text_data_obj, preverse_id):
+    file = ET.Element("file")
+    file.set("original", "global_" + source_lang + "-" + target_lang)
+    source_language = source_lang
+    file.set("source-language", source_lang)
+    file.set("target-language", target_lang)
+    root.append(file)
+    _create_xliff_file_body(file, source_language, image_text_data_obj, preverse_id)
+
+
+def _create_xliff_file_body(file, source_language, image_text_data_obj, preverse_id):
+    body = ET.Element("body")
+    file.append(body)
+    for image_text_data in image_text_data_obj["texts"]:
+        attrs = {}
+        if preverse_id:
+            attrs = {"id": image_text_data["id"]}
+
+        trans_unit = ET.Element("trans-unit", attrs)
+        source = ET.Element("source", {"xml:xlang": source_language})
+        source.text = image_text_data["text"]
+        trans_unit.append(source)
+        body.append(trans_unit)
 
 
 def create_translation_files(output_format="text", lang="en", preserve_id=True, file=None, force=False):
