@@ -15,3 +15,12 @@ def get_filename_and_ext(file_path):
         "filename": filename,
         "ext": file_extension
     }
+
+
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
