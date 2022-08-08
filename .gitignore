@@ -135,3 +135,4 @@ _output/
 !_input/.keep
 !_output/.keep
 resources/YOLOv4/yolov4-obj_final.weights
+*__clean.*
