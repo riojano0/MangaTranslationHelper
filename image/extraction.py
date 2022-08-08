@@ -8,14 +8,18 @@ from config import INPUT_DIR, OUTPUT_DIR, NET_FROM_DARKNET, BUBBLE_SUFFIX_FOLDER
 from util import get_filename_and_ext, allowed_file
 
 
-def _image_extraction_data():
+def _image_extraction_data(file_input=None, force=False):
     data = {}
     files = []
     walks = os.walk(INPUT_DIR)
 
     for (path, sub_dirs, walkFile) in walks:
         for name in walkFile:
-            files.append(os.path.join(path, name))
+            if file_input is not None and len(file_input):
+                if name == file_input:
+                    files.append(os.path.join(path, name))
+            else:
+                files.append(os.path.join(path, name))
 
     for i, file in enumerate(files):
         file_info = get_filename_and_ext(file)
@@ -28,7 +32,7 @@ def _image_extraction_data():
         image_name = file_info["filename"] + file_info["ext"]
 
         already_processed = os.path.join(OUTPUT_DIR, sub_folder, image_name)
-        if os.path.isfile(already_processed):
+        if os.path.exists(already_processed) and not force:
             continue
 
         if file and allowed_file(file):
@@ -38,11 +42,12 @@ def _image_extraction_data():
             cleaned_bubbles = []
             # Sort not comprehensive only to bring a little help
             bboxes_sorted = sorted(bboxes, key=lambda array: [array[1], -array[0]])
+            margin_extra = 2
             for j in bboxes_sorted:
                 x = j[0]
                 y = j[1]
-                w = j[2] - 10  # Reduce Bubble Size, can cause problem user carefully
-                h = j[3] - 10  # Reduce Bubble Size, can cause problem user carefully
+                w = j[2] + margin_extra  # Reduce Bubble Size, can cause problem user carefully
+                h = j[3] + margin_extra  # Reduce Bubble Size, can cause problem user carefully
                 cropped = img[y:y + h, x:x + w]
                 ret, buffer = cv2.imencode(file_info["ext"], cropped)
                 cleaned_bubbles.append([x, y, buffer])
@@ -98,7 +103,7 @@ def _serialize_image_page(img_clean):
     return image_folder
 
 
-def extract_image_and_clean():
-    data = _image_extraction_data()
+def extract_image_and_clean(file=None, force=False):
+    data = _image_extraction_data(file_input=file, force=force)
     _serialize_image_data(data)
     print("Complete extract_image_and_clean")
