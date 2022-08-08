@@ -1,4 +1,5 @@
 import os
+import platform
 from rimuto import detect
 
 # General
@@ -13,9 +14,10 @@ BUBBLE_SUFFIX_FOLDER = "_bubbles"
 # Tesseract
 TESSERACT_HOME = os.getenv('TESSERACT_HOME')
 if len(TESSERACT_HOME) > 0:
-    PATH_TO_TESSERACT = os.path.join(TESSERACT_HOME, 'tesseract.exe')
-else:
-    PATH_TO_TESSERACT = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    if platform.system() == "Windows":
+        PATH_TO_TESSERACT = os.path.join(TESSERACT_HOME, 'tesseract.exe')
+    else:
+        PATH_TO_TESSERACT = os.path.join(TESSERACT_HOME, 'tesseract')
 
 # YOLOv4
 LABELS_PATH = os.path.join(SCRIPT_DIR, "resources", "YOLOv4", "obj.names")
